@@ -1,0 +1,127 @@
+{
+  "project_info": {
+    "project_number": "158350882171",
+    "firebase_url": "https://flutter-wallpaper-apps.firebaseio.com",
+    "project_id": "flutter-wallpaper-apps",
+    "storage_bucket": "flutter-wallpaper-apps.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158350882171:android:018c4fbdf30a89b253b9de",
+        "android_client_info": {
+          "package_name": "com.droidates.ipad_wallpapers"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "158350882171-8au78j8slq9ejhmqqdqf1u1pvig362ao.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.droidates.ipad_wallpapers",
+            "certificate_hash": "3013881c3709eb4f7836a3ce92733992d938e974"
+          }
+        },
+        {
+          "client_id": "158350882171-u5hkb66120snceo5ftieo0hjknpshrb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFoTVmRTFGnlXbup3nSkU1Xg22IBv9V4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158350882171-u5hkb66120snceo5ftieo0hjknpshrb1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "158350882171-4ln7gb9qm0p7uttbmhfdqbk14p8qjv85.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.droidates.ipadWallpapers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158350882171:android:15931d6dba0c817053b9de",
+        "android_client_info": {
+          "package_name": "com.droidates.wallez_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "158350882171-u5hkb66120snceo5ftieo0hjknpshrb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFoTVmRTFGnlXbup3nSkU1Xg22IBv9V4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158350882171-u5hkb66120snceo5ftieo0hjknpshrb1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "158350882171-4ln7gb9qm0p7uttbmhfdqbk14p8qjv85.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.droidates.ipadWallpapers"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158350882171:android:fa7f2a976b1caee353b9de",
+        "android_client_info": {
+          "package_name": "com.droidates.wallpaper_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "158350882171-u5hkb66120snceo5ftieo0hjknpshrb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFoTVmRTFGnlXbup3nSkU1Xg22IBv9V4A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158350882171-u5hkb66120snceo5ftieo0hjknpshrb1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "158350882171-4ln7gb9qm0p7uttbmhfdqbk14p8qjv85.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.droidates.ipadWallpapers"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,145 +1,68 @@
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:image_downloader/image_downloader.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:photo_view/photo_view_gallery.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:velocity_x/velocity_x.dart';
+import 'package:wallez_app/Controller/FavWallpaperController.dart';
+import 'package:wallez_app/Controller/connectivity_provider.dart';
 import 'package:wallez_app/View/Widgets/utilities.dart';
-import 'package:wallez_app/Model/wallpaper.dart';
 
-/*class FullScreen extends StatefulWidget {
-  @override
-  _FullScreenState createState() => _FullScreenState();
-}
-
-class _FullScreenState extends State<FullScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        width: double.maxFinite,
-        height: double.maxFinite,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Hero(
-              transitionOnUserGestures: true,
-              tag: Get.arguments[0].toString(),
-              child: Image.network(
-                Get.arguments[0].toString(),
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.fromLTRB(24, 16, 16, 32),
-                color: Colors.black.withOpacity(0.7),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(Get.arguments[1]),
-                          Text(Get.arguments[3]),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 6,
-                      child: Vx.isAndroid
-                          ? Row(
-                              children: [
-                                Expanded(
-                                  child: IconButton(
-                                      icon: Icon(Icons.share_rounded),
-                                      onPressed: () {}),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                      icon: Icon(Icons.favorite_border_rounded),
-                                      onPressed: () {}),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                      icon: Icon(Icons.download_rounded),
-                                      onPressed: () {}),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                      icon: Icon(Icons.format_paint_rounded),
-                                      onPressed: () {
-                                        setWallpaper(
-                                            context: context,
-                                            imgUrl: Get.arguments[0].toString());
-                                      }),
-                                )
-                              ],
-                            )
-                          : Row(
-                              children: [
-                                Expanded(
-                                  child: IconButton(
-                                    icon: Icon(CupertinoIcons.share),
-                                    onPressed: () {},
-                                  ),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                    icon: Icon(CupertinoIcons.heart),
-                                    onPressed: () {},
-                                  ),
-                                ),
-                                Expanded(
-                                  child: IconButton(
-                                    icon: Icon(CupertinoIcons.download_circle),
-                                    onPressed: () {},
-                                  ),
-                                ),
-                              ],
-                            ),
-                    )
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-
-}*/
+import '../colors.dart';
 
 class FullScreen extends StatefulWidget {
-  final List<Wallpaper> wallpaperList;
-  final int initialWallpaper;
+  final thumbnail;
+  final imageUrl;
+  final source;
+  final category;
+  final wallpaperId;
+  final index;
+  final wallpaperList;
 
-  FullScreen(
-      {Key key, @required this.wallpaperList, @required this.initialWallpaper})
-      : super(key: key);
+  FullScreen({
+    Key key,
+    @required this.thumbnail,
+    @required this.imageUrl,
+    @required this.source,
+    @required this.category,
+    @required this.wallpaperId,
+    @required this.index,
+    @required this.wallpaperList,
+  }) : super(key: key);
 
   @override
   _FullScreenState createState() => _FullScreenState();
 }
 
 class _FullScreenState extends State<FullScreen> {
-  PageController _pageController;
+  Directory directory;
+  String imagePath;
+  String checkImage;
+  List<String> images = [];
+  List<Color> colors;
 
   @override
   void initState() {
     super.initState();
+    Provider.of<ConnectivityProvider>(context, listen: false).startMonitoring();
+  }
+
+  /*PageController _pageController;
+  int _currentIndex;*/
+
+/*
+  @override
+  void initState() {
+    super.initState();
     _pageController = PageController(initialPage: widget.initialWallpaper);
+    _currentIndex = widget.initialWallpaper;
   }
 
   @override
@@ -147,108 +70,283 @@ class _FullScreenState extends State<FullScreen> {
     super.dispose();
     _pageController.dispose();
   }
+*/
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Builder(
-        builder: (BuildContext context) {
-          return Stack(
-            children: [
-              PhotoViewGallery.builder(
-                  pageController: _pageController,
-                  itemCount: widget.wallpaperList.length,
-                  builder: (BuildContext context, int index) {
-                    return PhotoViewGalleryPageOptions(
-                      heroAttributes:
-                      PhotoViewHeroAttributes(tag: Get.arguments[0]),
-                      imageProvider: CachedNetworkImageProvider(
-                          widget.wallpaperList
-                              .elementAt(index)
-                              .thumbnail),
-                    );
-                  }),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Row(
-                  children: [
-                    IconButton(
-                        icon: Icon(Icons.download_rounded),
-                        onPressed: () async {
-                          var status = await Permission.storage.request();
-                        }),
-                    IconButton(
-                        icon: Icon(Icons.format_paint_rounded),
-                        onPressed: () async {
-                          await setWallpaper(
-                              context: context,
-                              imgUrl: widget.wallpaperList
-                                  .elementAt(_pageController.page.toInt())
-                                  .thumbnail);
-                        }),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
+  final Dio dio = Dio();
+  bool loading = false;
+  double progress = 0;
 
-  Future _downloadWallpaper(BuildContext context) async {
-    var status = await Permission.storage.request();
+  Future<bool> saveWallpaper(String url, String fileName) async {
+    try {
+      if (Platform.isAndroid) {
+        if (await _requestPermission(Permission.storage)) {
+          directory = await getExternalStorageDirectory();
 
-    if (status.isGranted) {
-      try {
-        var imageId = await ImageDownloader.downloadImage(
-            widget.wallpaperList
-                .elementAt(_pageController.page.toInt())
-                .thumbnail,
-            destination:
-            AndroidDestinationType.directoryPictures);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Wallpaper Downloaded'),
-            action: SnackBarAction(
-                label: 'Open',
-                onPressed: () async {
-                  var path =
-                  await ImageDownloader.findPath(
-                      imageId);
-                  await ImageDownloader.open(path);
-                }),
-          ),
-        );
-      } catch (error) {
-        print('Error $error');
+          String newPath = "";
+          print(directory);
+          List<String> paths = directory.path.split("/");
+          for (int x = 1; x < paths.length; x++) {
+            String folder = paths[x];
+            if (folder != "Android") {
+              newPath += "/" + folder;
+            } else {
+              break;
+            }
+          }
+          newPath = newPath + "/WallezApp";
+          print(newPath);
+
+          //  final file = await File(newPath).create(recursive: true);
+
+          directory = Directory(newPath);
+        } else {
+          return false;
+        }
+      } else {
+        if (await _requestPermission(Permission.photos)) {
+          directory = await getTemporaryDirectory();
+        } else {
+          return false;
+        }
       }
-    } else {
-      _showOpenSettingsAlert(context);
+      File saveFile = File(directory.path + "/$fileName");
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
+      }
+      if (await directory.exists()) {
+        var list = directory.listSync();
+        // print('List length ${list.length}');
+        String check = widget.wallpaperId;
+        for (int i = 0; i < list.length; i++) {
+          if (list[i].toString().contains(check)) {
+            print('Wallpaper Already Downloaded');
+            return false;
+          }
+        }
+
+        await dio.download(url, saveFile.path,
+            onReceiveProgress: (value1, value2) {
+          setState(() {
+            progress = value1 / value2;
+          });
+        });
+        // print("Wallpaper not downloaded");
+
+        if (Platform.isIOS) {
+          await ImageGallerySaver.saveFile(saveFile.path,
+              isReturnPathOfIOS: true);
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 
-  void _showOpenSettingsAlert(BuildContext context) {
-    showDialog(
-        context: context,
-        builder: (BuildContext bc) {
-          return AlertDialog(
-            title: Text('Need access to storage'),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  openAppSettings();
-                },
-                child: Text('Open Settings'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(bc).pop();
-                },
-                child: Text('Cancel'),
-              )
-            ],
-          );
-        });
+  Future<bool> _requestPermission(Permission permission) async {
+    if (await permission.isGranted) {
+      return true;
+    } else {
+      var result = await permission.request();
+      if (result == PermissionStatus.granted) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<bool> downloadFile() async {
+    setState(() {
+      loading = true;
+      progress = 0;
+    });
+    bool downloaded =
+        await saveWallpaper(widget.imageUrl, widget.wallpaperId + '.png');
+    if (downloaded) {
+      imagePath = directory.path + '/${widget.wallpaperId}.png';
+
+      print("File Downloaded");
+    } else {
+      print("Wallpaper Alreadu Exists");
+      imagePath = directory.path + '/${widget.wallpaperId}.png';
+
+      return false;
+    }
+
+    setState(() {
+      loading = false;
+    });
+    return true;
+  }
+
+  void _shareImage(BuildContext context, List<String> imagePath) async {
+    // A builder is used to retrieve the context immediately
+    // surrounding the ElevatedButton.
+    //
+    // The context's `findRenderObject` returns the first
+    // RenderObject in its descendent tree when it's not
+    // a RenderObjectWidget. The ElevatedButton's RenderObject
+    // has its position and size after it's built.
+    final box = context.findRenderObject() as RenderBox;
+    images = [];
+
+    if (imagePath.isNotEmpty) {
+      await Share.shareFiles(imagePath,
+          text: 'Try This amazing app',
+          sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
+    } else {
+      print('Image not found');
+    }
+  }
+  Future<void> colorsList() async{
+
+}
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ConnectivityProvider>(
+      builder: (consumerContext, model, child) {
+        if (model.isOnline != null) {
+          return model.isOnline
+              ? Scaffold(
+                  body: Builder(
+                    builder: (BuildContext context) {
+                      return Stack(
+                        children: [
+                          InteractiveViewer(
+                            child: Container(
+                              height: double.maxFinite,
+                              width: double.maxFinite,
+                              child: Hero(
+                                  transitionOnUserGestures: true,
+                                  tag: widget.wallpaperId,
+                                  child: CachedNetworkImage(
+                                    fit: BoxFit.cover,
+                                    imageUrl: widget.imageUrl,
+                                    progressIndicatorBuilder:
+                                        (context, url, downloadProgress) =>
+                                            Center(
+                                      child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation(
+                                              Theme.of(context).errorColor),
+                                          value: downloadProgress.progress),
+                                    ),
+                                  )),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Container(
+                              margin: EdgeInsets.fromLTRB(16, 40, 0, 0),
+                              decoration: BoxDecoration(
+                                  color: Colors.black45,
+                                  borderRadius: BorderRadius.circular(50)),
+                              child: IconButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                icon: Vx.isAndroid
+                                    ? Icon(Icons.arrow_back_rounded)
+                                    : Icon(CupertinoIcons.back),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Vx.randomPrimaryColor,
+                                  borderRadius: BorderRadius.circular(24)),
+                              margin: EdgeInsets.all(16),
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  IconButton(
+                                      icon: Icon(Icons.download_rounded),
+                                      onPressed: () async {
+                                        downloadFile();
+                                      }),
+                                  IconButton(
+                                    onPressed: () async {
+                                      if (await downloadFile()) {
+                                        images.add(imagePath);
+                                        _shareImage(context, images);
+                                      } else {
+                                        images.add(imagePath);
+                                        _shareImage(context, images);
+                                      }
+                                    },
+                                    icon: Icon(Icons.share_rounded),
+                                  ),
+                                  Consumer<WallpaperController>(
+                                    builder: (context, data, child) {
+                                      var favWallpaperManager =
+                                          Provider.of<WallpaperController>(
+                                              context,
+                                              listen: false);
+                                      return IconButton(
+                                        icon: widget.wallpaperList
+                                                .elementAt(widget.index)
+                                                .isFavorite
+                                            ? Icon(
+                                                Icons.favorite_rounded,
+                                                color: Colors.redAccent,
+                                              )
+                                            : Icon(
+                                                Icons.favorite_border_rounded,
+                                                color: textColorDark,
+                                              ),
+                                        onPressed: () {
+                                          if (widget.wallpaperList
+                                              .elementAt(widget.index)
+                                              .isFavorite) {
+                                            favWallpaperManager.removeFromFav(
+                                                widget.wallpaperList
+                                                    .elementAt(widget.index),
+                                                context);
+                                          } else {
+                                            favWallpaperManager.addToFav(
+                                                widget.wallpaperList
+                                                    .elementAt(widget.index),
+                                                context);
+                                          }
+                                          widget.wallpaperList
+                                                  .elementAt(widget.index)
+                                                  .isFavorite =
+                                              !widget.wallpaperList
+                                                  .elementAt(widget.index)
+                                                  .isFavorite;
+                                        },
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                      icon: Icon(Icons.format_paint_rounded),
+                                      onPressed: () async {
+                                        await setWallpaper(
+                                            context: context,
+                                            imgUrl: widget.imageUrl);
+                                      }),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                )
+              : 'No internet connection'.marquee();
+        }
+        return Container(
+            /*child: Center(
+            child: CircularProgressIndicator(),
+          ),*/
+            );
+      },
+    );
   }
 }

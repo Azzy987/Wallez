@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:wallez_app/Controller/WallpaperController.dart';
+import 'package:provider/provider.dart';
+import 'package:wallez_app/Controller/connectivity_provider.dart';
 import 'package:wallez_app/Model/wallpaper.dart';
 import 'package:wallez_app/View/Category.dart';
-import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 class Categories extends StatefulWidget {
   final List<Wallpaper> wallpaperList;
@@ -15,37 +16,41 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-  final wallpaperController = WallpaperController().to;
   final categories = [];
   final categoryImages = [];
+
 
   @override
   void initState() {
     super.initState();
     widget.wallpaperList.forEach((wallpaper) {
       var category = wallpaper.categoryName;
-      if (!categories.contains(category)){
+      if (!categories.contains(category)) {
         categories.add(category);
         categoryImages.add(wallpaper.thumbnail);
       }
     });
+    Provider.of<ConnectivityProvider>(context, listen: false).startMonitoring();
   }
+
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: GridView.builder(
+    return Consumer<ConnectivityProvider>(
+        builder: (consumerContext, model, child){
+      if (model.isOnline!=null){
+        return model.isOnline ?
+      GridView.builder(
             itemBuilder: (context, index) {
               String thumbnail = categoryImages.elementAt(index);
               //    String wallpostId = snapshot.data.docs.elementAt(index).docID;
               return GridTile(
                 child: Container(
+                  margin: EdgeInsets.all(5),
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(
-                      Radius.circular(8),
+                      Radius.circular(30),
                     ),
                   ),
                   child: Stack(
@@ -53,12 +58,17 @@ class _CategoriesState extends State<Categories> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          Get.to(() => Category(
-                            category: categories.elementAt(index),
-                          ), arguments: [
-                            thumbnail,
-                            categories.elementAt(index),
-                          ]);
+                          Navigator.push(context,
+                         MaterialPageRoute(
+                           builder: (context){
+                             return Category(
+                               category: categories.elementAt(index),
+                               thumbnail: categoryImages.elementAt(index),
+                             );
+                           }
+                         ),
+                         );
+
                         },
                         child: Hero(
                           tag: thumbnail,
@@ -66,8 +76,10 @@ class _CategoriesState extends State<Categories> {
                           child: CachedNetworkImage(
                             imageUrl: thumbnail,
                             fit: BoxFit.cover,
-                            placeholder: (context, _) =>
-                                Image.asset('assets/loading.png', fit: BoxFit.cover,),
+                            placeholder: (context, _) => Image.asset(
+                              'assets/loading.png',
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
@@ -77,12 +89,14 @@ class _CategoriesState extends State<Categories> {
                           categories.elementAt(index).toUpperCase(),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            decoration: TextDecoration.combine([
-                              TextDecoration.overline,
-                              TextDecoration.underline,
-                            ]),
+                              decoration: TextDecoration.combine(
+                                [
+                                  TextDecoration.overline,
+                                  TextDecoration.underline,
+                                ],
+                              ),
                               decorationStyle: TextDecorationStyle.double,
-                              fontSize: 20,
+                              fontSize: 24,
                               fontWeight: FontWeight.w600),
                         ),
                       )
@@ -95,10 +109,19 @@ class _CategoriesState extends State<Categories> {
             itemCount: categories.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 1,
-                childAspectRatio: 2.0,
+                childAspectRatio: 1.9,
                 mainAxisSpacing: 8,
                 crossAxisSpacing: 8),
-          )),
+
+    ) : 'No internet connection'.text.xl4.makeCentered().shimmer();
+      }
+      return Container(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+        },
     );
   }
 }

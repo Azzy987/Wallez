@@ -20,10 +20,11 @@ Future<void> setWallpaper({
     title: Text('Set as'),
     actions: [
       CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.of(context).pop(SetWallpaperAs.Home);
-          },
-          child: Text('Home Screen')),
+        onPressed: () {
+          Navigator.of(context).pop(SetWallpaperAs.Home);
+        },
+        child: Text('Home Screen'),
+      ),
       CupertinoActionSheetAction(
           onPressed: () {
             Navigator.of(context).pop(SetWallpaperAs.Lock);
